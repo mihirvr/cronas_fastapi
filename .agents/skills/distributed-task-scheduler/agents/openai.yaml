@@ -1,0 +1,4 @@
+interface:
+  display_name: "Distributed Task Scheduler"
+  short_description: "Build and extend a Python FastAPI Kafka scheduler"
+  default_prompt: "Use $distributed-task-scheduler to design or implement a FastAPI Kafka based distributed job scheduler."

@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+pydantic
+redis
+kafka-python
+psycopg[binary]
