@@ -4,7 +4,7 @@ sqlalchemy==2.0.43
 psycopg[binary]==3.2.9
 pydantic-settings==2.10.1
 redis==6.4.0
-kafka-python==2.2.15
+kafka-python-ng==2.2.3
 croniter==6.0.0
 python-dotenv==1.1.1
 pytest==8.4.2

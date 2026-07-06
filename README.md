@@ -21,7 +21,7 @@ Instead of relying on an asynchronous event loop that might suffer from CPU-boun
 ## Tech Stack Breakdown
 
 * **Framework:** FastAPI
-* **Message Broker & Queue:** Apache Kafka & Redis
+* **Message Broker & Queue:** Apache Kafka & Redis (using high-performance `confluent-kafka` for Python 3.12 compatibility and speed)
 * **Database & Persistence:** PostgreSQL (SQLAlchemy)
 
 ## Local Scaffolding & Setup
@@ -50,13 +50,14 @@ Copy-Item .env.example .env
 Apply the Alembic migrations to set up the necessary PostgreSQL tables:
 
 ```bash
-python -m alembic upgrade head
+alembic upgrade head
 ```
 
 ### 4. Bootstrapping Kafka Topics (Optional)
-Ensure the required topics (`cronas.run`, `cronas.retry`, `cronas.dlq`) exist:
+Ensure the required topics (`cronas.run`, `cronas.retry`, `cronas.dlq`) exist. Make sure to set `PYTHONPATH` so the script can locate your config:
 
 ```bash
+$env:PYTHONPATH="."
 python scripts\bootstrap_topics.py
 ```
 
@@ -70,12 +71,12 @@ uvicorn services.job_api.app.main:app --reload --host 127.0.0.1 --port 8000
 
 **Watcher Process (polls Redis and enqueues to Kafka):**
 ```bash
-python services\watcher\watcher.py
+python -m services.watcher.watcher
 ```
 
 **Executor Process (consumes from Kafka and executes jobs):**
 ```bash
-python services\executor\executor.py
+python -m services.executor.executor
 ```
 
 The live operational dashboard is accessible at `http://127.0.0.1:8000/dashboard` and API documentation at `http://127.0.0.1:8000/docs`.

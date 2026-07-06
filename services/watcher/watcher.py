@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 import time
 from uuid import UUID
 
@@ -19,7 +21,6 @@ def run_once() -> None:
 
     if not due_job_ids:
         producer.flush()
-        producer.close()
         return
 
     with SessionLocal() as session:
@@ -31,11 +32,10 @@ def run_once() -> None:
             attempt = len(repo.list_runs(job.job_id)) + 1
             run = repo.create_run(job, attempt=attempt)
             message = repo.build_message(job, run)
-            producer.send(settings.jobs_run_topic, message)
+            producer.produce(settings.jobs_run_topic, value=json.dumps(message).encode("utf-8"))
             if job.next_run_at is not None:
                 scheduler.schedule_job(job.job_id, job.next_run_at)
     producer.flush()
-    producer.close()
 
 
 def main() -> None:

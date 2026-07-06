@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends, FastAPI, HTTPException, status
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -13,6 +13,11 @@ from shared.repository import JobRepository
 from shared.schemas import JobCreate, JobResponse, JobRunResponse, JobUpdate
 
 app = FastAPI(title="CronasFastAPI", version="1.0.0")
+
+
+@app.get("/")
+def read_root():
+    return RedirectResponse(url="/dashboard")
 
 
 @app.get("/health")

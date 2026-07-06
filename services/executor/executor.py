@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from uuid import UUID
 
 from shared.config import get_settings
@@ -32,8 +34,14 @@ def main() -> None:
     print("Executor started. Make sure you already ran: python -m alembic upgrade head")
     print("Waiting for Kafka messages...")
 
-    for message in consumer:
-        payload = message.value
+    while True:
+        message = consumer.poll(1.0)
+        if message is None:
+            continue
+        if message.error():
+            continue
+
+        payload = json.loads(message.value().decode("utf-8"))
         run_id = UUID(payload["run_id"])
         job_id = UUID(payload["job_id"])
         attempt = int(payload["attempt"])
@@ -61,7 +69,7 @@ def main() -> None:
                     scheduler.schedule_job(job.job_id, retry_at)
                 else:
                     repo.mark_run_failed(run_id, str(exc), dead_letter=True)
-                    producer.send(settings.jobs_dlq_topic, payload)
+                    producer.produce(settings.jobs_dlq_topic, value=json.dumps(payload).encode("utf-8"))
         producer.flush()
         consumer.commit()
 
